@@ -339,9 +339,9 @@ def get_options():
         gl.optsflag = 1
 
     if opts.com:
-        gl.mysql_headline1 += colored('-----------QPS--TPS----------- ',
+        gl.mysql_headline1 += colored('-----------QPS--TPS------------------ ',
                                       'green', 'on_blue', attrs=['bold'])
-        gl.mysql_headline2 += colored('  ins   upd   del    sel   iud|',
+        gl.mysql_headline2 += colored('  ins   upd   del    sel   iud    trx|',
                                       'green', attrs=['bold', 'underline'])
         gl.com = gl.optflag = 1
     if opts.hit:
@@ -873,6 +873,8 @@ def get_mysqlstat():
                            int(gl.mystat1["Com_delete"])) / gl.interval
             select_diff = (int(mystat2["Com_select"]) -
                            int(gl.mystat1["Com_select"])) / gl.interval
+            trans_diff  =  ((int(mystat2["Com_commit"]) + int(mystat2["Com_rollback"])) -
+                            (int(gl.mystat1["Com_commit"]) + int(gl.mystat1["Com_rollback"]))) / gl.interval
             read_request = (int(mystat2["Innodb_buffer_pool_read_requests"]) - int(
                 gl.mystat1["Innodb_buffer_pool_read_requests"])) / gl.interval
             read = (
@@ -915,6 +917,7 @@ def get_mysqlstat():
                 # Total TPS
                 cprint("{:>6.0f}".format(insert_diff +
                                          update_diff + delete_diff), 'yellow', end='')
+                cprint("{:7.0f}".format(trans_diff), 'yellow', end='')
                 cprint('|', 'green', attrs=['bold'], end='')
             if gl.innodb_hit:
                 # Innodb_buffer_pool_read_requests
@@ -1042,7 +1045,8 @@ def get_mysqlstat():
         else:
             if gl.com:
                 cprint("{:>5d}{:>6d}{:>6d}".format(0, 0, 0), 'white', end='')
-                cprint("{:>7d}{:>6d}".format(0, 0), 'yellow', end='')
+                #cprint("{:>7d}{:>6d}".format(0, 0), 'yellow', end='')
+                cprint("{:>7d}{:>6d}{:>7d}".format(0, 0, 0), 'yellow', end='')
                 cprint('|', 'green', attrs=['bold'], end='')
             if gl.innodb_hit:
                 cprint("{:>7d}".format(0), 'white', end='')
